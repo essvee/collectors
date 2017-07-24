@@ -2,6 +2,8 @@ from fuzzywuzzy import process
 import numpy as np
 from fuzzywuzzy import fuzz
 
+cluster_list = []
+
 
 def cluster_names(input_list):
     clusters = []
@@ -23,22 +25,23 @@ def cluster_names(input_list):
 
 def token_set_clustering(input_list):
     checked = []
-    cluster_list = []
 
     for name in input_list:
         cluster = []
-        # Create a new list of names we haven't encountered so far
-        unchecked = np.setdiff1d(input_list, checked, assume_unique=True)
-        for unchecked_name in unchecked:
-            if (fuzz.token_set_ratio(name, unchecked_name) >= 90):
-                cluster.append(unchecked_name)
+        # print("Currently looking at: " + name)
+
+        # Create a new list of names we haven't encountered so far + turn into a list
+        unchecked_list = np.setdiff1d(input_list, checked, assume_unique=True).tolist()
+
+        # Go through each 'new' name and check for similarity against current name
+        for unchecked_name in unchecked_list:
+            # Only consider if similar enough and new to this iteration
+            if (fuzz.token_set_ratio(name, unchecked_name) >= 80) and (unchecked_name not in checked):
                 checked.append(unchecked_name)
-            else:
-                cluster.append(name)
-                checked.append(name)
-        # Once we've passed through the whole list, add cluster to cluster_list and return
-        cluster_list.append(cluster)
-        return cluster_list
+                cluster.append(unchecked_name)
+
+        if len(cluster) != 0:
+            cluster_list.append(cluster)
 
 
 names = ["A Chavez", "A Hamon", "A Harvey", "A Mohyuddin CIBC leg", "A Polaszek", "A Postle", "A wogumi", "A, Mohyuddin CIBC leg.",
@@ -46,9 +49,6 @@ names = ["A Chavez", "A Hamon", "A Harvey", "A Mohyuddin CIBC leg", "A Polaszek"
          "A. Mohyuddin", "A. Mohyuddin CIBC", "A. Mohyuddin CIBC leg.", "A. Moore", "A. Polac. E", "A. Polac. E.", "A. Polarsek",
          "A. Polaszak", "A. Polaszek", "A. Polaszek et al.", "A. van Harten", "A.Aguiar"]
 
-
-clean_cluster = token_set_clustering(names)
-print(names)
-for clean_names in clean_cluster:
-    print(clean_names)
-
+token_set_clustering(names)
+for list in cluster_list:
+    print(list)
