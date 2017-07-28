@@ -1,13 +1,10 @@
 import numpy as np
-import pandas as pd
 from fuzzywuzzy import fuzz
+import csv
 
 cluster_list = []
-names = set()
 
-names = pd.read_csv("coll_names.csv", sep=',', usecols=['Collector1'], squeeze=True)
-print(names)
-
+# Find and cluster matching names
 def token_set_clustering(input_list):
     checked = []
 
@@ -27,12 +24,15 @@ def token_set_clustering(input_list):
         if len(cluster) != 0:
             cluster_list.append(cluster)
 
+# Get names from csv - should be unique
+with open('coll_names.csv', encoding='utf-8') as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    names = []
+    for row in readCSV:
+        names.append(row[0])
 
-# names = ["A Chavez", "A Hamon", "A Harvey", "A Mohyuddin CIBC leg", "A Polaszek", "A Postle", "A wogumi", "A, Mohyuddin CIBC leg.",
-#          "A. Aguias", "A. Broodbank", "A. Busck", "A. C. Jashi", "A. Garido", "A. Harvey", "A. K. Walker", "A. Lopez-Avila", "A. Michelmore",
-#          "A. Mohyuddin", "A. Mohyuddin CIBC", "A. Mohyuddin CIBC leg.", "A. Moore", "A. Polac. E", "A. Polac. E.", "A. Polarsek",
-#          "A. Polaszak", "A. Polaszek", "A. Polaszek et al.", "A. van Harten", "A.Aguiar"]
+token_set_clustering(names)
+for name_list in cluster_list:
+    print(name_list)
 
-# token_set_clustering(names)
-# for name_list in cluster_list:
-#     print(name_list)
+print(len(cluster_list))
